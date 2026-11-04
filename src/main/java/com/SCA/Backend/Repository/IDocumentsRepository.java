@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,4 +49,33 @@ public interface IDocumentsRepository extends JpaRepository<Documents, Long> {
         WHERE d.IdDocument = :id
         """)
     Optional<Documents> findByIdWithRelations(@Param("id") Long id);
+
+
+    @Query("""
+        SELECT COUNT(d) FROM Documents d
+        WHERE d.status.Id_Status NOT IN :excludedIds
+        """)
+    long countByStatusIdNotIn(@Param("excludedIds") List<Long> excludedIds);
+
+
+    @Query("""
+        SELECT COUNT(d) FROM Documents d
+        WHERE d.status.Id_Status = :idStatus
+        """)
+    long countByStatusId(@Param("idStatus") Long  idStatus);
+
+
+    @Query("""
+        SELECT COUNT(d) FROM Documents d
+        WHERE d.LimitDate < :today
+          AND d.status.Id_Status NOT IN :excludedIds
+        """)
+    long countExpired(@Param("today") LocalDateTime today,
+                      @Param("excludedIds") List<Long> excludedIds);
+
+    @Query("""
+        SELECT COUNT(d) FROM Documents d
+        WHERE d.LoadedDate = :today
+        """)
+    long countReceivedToday(@Param("today") LocalDateTime today);
 }
