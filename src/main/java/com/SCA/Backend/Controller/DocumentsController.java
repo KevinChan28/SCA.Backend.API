@@ -3,6 +3,7 @@ package com.SCA.Backend.Controller;
 import com.SCA.Backend.DTO.CreateDocumentDTO;
 import com.SCA.Backend.DTO.DocumentResponseDTO;
 import com.SCA.Backend.DTO.DocumentSummaryDTO;
+import com.SCA.Backend.DTO.UpdateDocumentDTO;
 import com.SCA.Backend.Service.IDocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -65,7 +66,7 @@ public class DocumentsController {
             @ApiResponse(responseCode = "404", description = "Status, tipo o responsable de documento no encontrado"),
     })
     @PutMapping
-    public ResponseEntity<Long> updateDocument(@Valid @RequestBody CreateDocumentDTO document, @RequestBody Long idDocument) {
+    public ResponseEntity<Long> updateDocument(@Valid @RequestBody UpdateDocumentDTO document, @RequestBody Long idDocument) {
         Long id = _documentService.updateDocument(idDocument,document);
         return ResponseEntity.ok(id);
     }
