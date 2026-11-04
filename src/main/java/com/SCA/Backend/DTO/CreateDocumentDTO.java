@@ -17,8 +17,6 @@ public record CreateDocumentDTO(
     Long assignedTo,
     LocalDate limitDate,
     @NotNull
-    Long statusId,
-    @NotNull
     Long typeId,
     String observation){}
 

@@ -3,6 +3,7 @@ package com.SCA.Backend.Service.Imp;
 import com.SCA.Backend.DTO.CreateDocumentDTO;
 import com.SCA.Backend.DTO.DocumentResponseDTO;
 import com.SCA.Backend.DTO.DocumentSummaryDTO;
+import com.SCA.Backend.DTO.UpdateDocumentDTO;
 import com.SCA.Backend.Models.Documents;
 import com.SCA.Backend.Models.Responsible;
 import com.SCA.Backend.Models.Status;
@@ -138,7 +139,7 @@ public class ImpDocumentService implements IDocumentService {
 
     @Override
     @Transactional
-    public Long updateDocument(Long idDocument,CreateDocumentDTO documentDto) {
+    public Long updateDocument(Long idDocument, UpdateDocumentDTO documentDto) {
 
         Documents document = _documentsRepository.findById(idDocument)
                 .orElseThrow(() -> new EntityNotFoundException("Documento no encontrado: " + idDocument));
@@ -211,7 +212,7 @@ public class ImpDocumentService implements IDocumentService {
         document.setObservation(createDocumentDTO.observation());
         document.setLoadedDate(LocalDateTime.now());
 
-        Status status = _statusRepository.findById(createDocumentDTO.statusId())
+        Status status = _statusRepository.findById(7L)
                 .orElseThrow(() -> new EntityNotFoundException("Estatus no encontrado"));
         document.setStatus(status);
 
