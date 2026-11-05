@@ -134,6 +134,16 @@ public class ImpDocumentService implements IDocumentService {
         Responsible responsible = _responsibleRepository.findById(responsibleId)
                 .orElseThrow(() -> new EntityNotFoundException("Responsable no encontrado: " + responsibleId));
 
+        //Cambiar el status a "Turnado" si el status es nuevo
+        if (document.getStatus().getId_Status() == ID_STATUS_NUEVO){
+
+            Status status = _statusRepository.findById(ID_STATUS_TURNADO)
+                    .orElseThrow(() -> new EntityNotFoundException("Estatus no encontrado: " + ID_STATUS_TURNADO));
+
+            document.setStatus(status);
+        }
+
+        //Actualizar el responsable
         document.setResponsible(responsible);
     }
 
