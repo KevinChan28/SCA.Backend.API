@@ -2,6 +2,8 @@ package com.SCA.Backend.Controller;
 
 import com.SCA.Backend.DTO.CreateDocumentDTO;
 import com.SCA.Backend.DTO.DocumentResponseDTO;
+import com.SCA.Backend.DTO.DocumentSummaryDTO;
+import com.SCA.Backend.DTO.UpdateDocumentDTO;
 import com.SCA.Backend.Service.IDocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,6 +32,7 @@ public class DocumentsController {
         this._documentService = _documentService;
     }
 
+
     @Operation(summary = "Obtener todos los documentos")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de documentos")
@@ -43,6 +46,7 @@ public class DocumentsController {
             @PageableDefault(size = 10, sort = "IdDocument", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(_documentService.findAllByFilters(statusId,typeId,responsibleId, pageable));
     }
+
 
     @Operation(summary = "Crear un documento")
     @ApiResponses({
@@ -62,8 +66,8 @@ public class DocumentsController {
             @ApiResponse(responseCode = "404", description = "Status, tipo o responsable de documento no encontrado"),
     })
     @PutMapping
-    public ResponseEntity<Long> updateDocument(@Valid @RequestBody CreateDocumentDTO document, @RequestBody Long idDocument) {
-        Long id = _documentService.updateDdocument(idDocument,document);
+    public ResponseEntity<Long> updateDocument(@Valid @RequestBody UpdateDocumentDTO document, @RequestBody Long idDocument) {
+        Long id = _documentService.updateDocument(idDocument,document);
         return ResponseEntity.ok(id);
     }
 
@@ -126,5 +130,15 @@ public class DocumentsController {
         _documentService.deleteDocumentById(idDocument);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Obtener el resumen de los estatus")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resumen de status")
+    })
+    @GetMapping("status/summary")
+    public ResponseEntity<DocumentSummaryDTO> getSummaryStatus(){
+        return ResponseEntity.ok().body(_documentService.getSummaryStatus());
     }
 }

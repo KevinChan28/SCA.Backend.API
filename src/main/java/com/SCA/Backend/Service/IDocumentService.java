@@ -2,6 +2,8 @@ package com.SCA.Backend.Service;
 
 import com.SCA.Backend.DTO.CreateDocumentDTO;
 import com.SCA.Backend.DTO.DocumentResponseDTO;
+import com.SCA.Backend.DTO.DocumentSummaryDTO;
+import com.SCA.Backend.DTO.UpdateDocumentDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,5 +18,6 @@ public interface IDocumentService {
     Page<DocumentResponseDTO> findAllByFilters(Long statusId, Long typeId, Long responsibleId, Pageable pageable);
     int createManyDocuments (List<CreateDocumentDTO> dtoDocumentsList);
     void assignResponsible(Long documentId, Long responsibleId);
-    Long updateDdocument(Long idDocument,CreateDocumentDTO document);
+    Long updateDocument(Long idDocument, UpdateDocumentDTO document);
+    DocumentSummaryDTO getSummaryStatus();
 }

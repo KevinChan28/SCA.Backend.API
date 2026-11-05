@@ -2,6 +2,8 @@ package com.SCA.Backend.Service.Imp;
 
 import com.SCA.Backend.DTO.CreateDocumentDTO;
 import com.SCA.Backend.DTO.DocumentResponseDTO;
+import com.SCA.Backend.DTO.DocumentSummaryDTO;
+import com.SCA.Backend.DTO.UpdateDocumentDTO;
 import com.SCA.Backend.Models.Documents;
 import com.SCA.Backend.Models.Responsible;
 import com.SCA.Backend.Models.Status;
@@ -16,8 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +32,13 @@ public class ImpDocumentService implements IDocumentService {
     private final IResponsibleRepository _responsibleRepository;
 
     private static final int MAX_BATCH_SIZE = 30;
+    private static final long ID_STATUS_ENVIADO = 6L;
+    private static final long ID_STATUS_TURNADO = 1L;
+    private static final long ID_STATUS_ELABORACION = 2L;
+    private static final long ID_STATUS_REVISION = 3L;
+    private static final long ID_STATUS_PARA_FIRMA = 4L;
+    private static final long ID_STATUS_FIRMADO = 5L;
+    private static final long ID_STATUS_NUEVO = 7L;
 
     public ImpDocumentService(IDocumentsRepository documentsRepository, IStatusRepository statusRepository, ITypeRepository typeRepository, IResponsibleRepository responsibleRepository) {
         _documentsRepository = documentsRepository;
@@ -91,9 +101,11 @@ public class ImpDocumentService implements IDocumentService {
     @Override
     @Transactional(readOnly = true)
     public Page<DocumentResponseDTO> findAllByFilters(Long statusId, Long typeId, Long responsibleId, Pageable pageable) {
+
         return _documentsRepository.findAllByFilters(statusId, typeId, responsibleId, pageable)
-                                    .map(this::toResponse);
+                        .map(this::toResponse);
     }
+
 
     @Override
     @Transactional
@@ -122,12 +134,22 @@ public class ImpDocumentService implements IDocumentService {
         Responsible responsible = _responsibleRepository.findById(responsibleId)
                 .orElseThrow(() -> new EntityNotFoundException("Responsable no encontrado: " + responsibleId));
 
+        //Cambiar el status a "Turnado" si el status es nuevo
+        if (document.getStatus().getId_Status() == ID_STATUS_NUEVO){
+
+            Status status = _statusRepository.findById(ID_STATUS_TURNADO)
+                    .orElseThrow(() -> new EntityNotFoundException("Estatus no encontrado: " + ID_STATUS_TURNADO));
+
+            document.setStatus(status);
+        }
+
+        //Actualizar el responsable
         document.setResponsible(responsible);
     }
 
     @Override
     @Transactional
-    public Long updateDdocument(Long idDocument,CreateDocumentDTO documentDto) {
+    public Long updateDocument(Long idDocument, UpdateDocumentDTO documentDto) {
 
         Documents document = _documentsRepository.findById(idDocument)
                 .orElseThrow(() -> new EntityNotFoundException("Documento no encontrado: " + idDocument));
@@ -154,6 +176,20 @@ public class ImpDocumentService implements IDocumentService {
         }
 
         return _documentsRepository.save(document).getIdDocument();
+    }
+
+    @Override
+    public DocumentSummaryDTO getSummaryStatus() {
+
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+
+        long opens = _documentsRepository.countByStatusIdNotIn(List.of(ID_STATUS_ENVIADO));
+        long notAssigned = _documentsRepository.countByStatusId(ID_STATUS_NUEVO);
+        long expired = _documentsRepository.countExpired(startOfToday,List.of(ID_STATUS_ENVIADO));
+        long receivedToday = _documentsRepository.countReceivedToday(startOfToday);
+        long readySign = _documentsRepository.countByStatusId(ID_STATUS_PARA_FIRMA);
+
+        return new DocumentSummaryDTO(opens, notAssigned, expired, receivedToday, readySign);
     }
 
     private DocumentResponseDTO toResponse(Documents d) {
@@ -184,9 +220,9 @@ public class ImpDocumentService implements IDocumentService {
         document.setSender(createDocumentDTO.sender());
         document.setLimitDate(createDocumentDTO.limitDate() != null ? createDocumentDTO.limitDate().atStartOfDay() : null);
         document.setObservation(createDocumentDTO.observation());
-        document.setLoadedDate(LocalDateTime.now());
+        document.setLoadedDate(LocalDate.now().atStartOfDay());
 
-        Status status = _statusRepository.findById(createDocumentDTO.statusId())
+        Status status = _statusRepository.findById(7L)
                 .orElseThrow(() -> new EntityNotFoundException("Estatus no encontrado"));
         document.setStatus(status);
 
