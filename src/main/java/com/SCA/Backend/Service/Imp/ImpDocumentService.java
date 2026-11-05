@@ -220,7 +220,7 @@ public class ImpDocumentService implements IDocumentService {
         document.setSender(createDocumentDTO.sender());
         document.setLimitDate(createDocumentDTO.limitDate() != null ? createDocumentDTO.limitDate().atStartOfDay() : null);
         document.setObservation(createDocumentDTO.observation());
-        document.setLoadedDate(LocalDateTime.now());
+        document.setLoadedDate(LocalDate.now().atStartOfDay());
 
         Status status = _statusRepository.findById(7L)
                 .orElseThrow(() -> new EntityNotFoundException("Estatus no encontrado"));
